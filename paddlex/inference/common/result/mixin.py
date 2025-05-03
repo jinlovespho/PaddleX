@@ -317,16 +317,18 @@ class ImgMixin:
             mime_type, _ = mimetypes.guess_type(file_path)
             return mime_type is not None and mime_type.startswith("image/")
 
+        # breakpoint()
         img = self._to_img()
-        if not _is_image_file(save_path):
+        if not _is_image_file(save_path):   # t
             fn = Path(self._get_input_fn())
             suffix = fn.suffix if _is_image_file(fn) else ".png"
             stem = fn.stem
             base_save_path = Path(save_path)
             for key in img:
                 save_path = base_save_path / f"{stem}_{key}{suffix}"
-                self._img_writer.write(save_path.as_posix(), img[key], *args, **kwargs)
-        else:
+                save_path_posix=save_path.as_posix()
+                self._img_writer.write(save_path_posix, img[key], *args, **kwargs)
+        else:   # f
             if len(img) > 1:
                 logging.warning(
                     f"The result has multiple img files need to be saved. But the `save_path` has been specfied as `{save_path}`!"

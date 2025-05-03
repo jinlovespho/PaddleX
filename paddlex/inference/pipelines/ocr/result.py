@@ -79,13 +79,16 @@ class OCRResult(BaseCVResult):
         Returns:
             Dict[Image.Image]: A dictionary containing two images: 'doc_preprocessor_res' and 'ocr_res_img'.
         """
+        # breakpoint()
+        # font = ImageFont.truetype("/usr/share/fonts/truetype/nanum/NanumGothic.ttf", size=15)
+        KOREAN_FONT_PATH = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
         boxes = self["rec_polys"]
         txts = self["rec_texts"]
-        image = self["doc_preprocessor_res"]["output_img"]
+        image = self["doc_preprocessor_res"]["output_img"]          # h w 3 [0,255]
         h, w = image.shape[0:2]
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)          # # h w 3 [0,255]
         img_left = Image.fromarray(image_rgb)
-        img_right = np.ones((h, w, 3), dtype=np.uint8) * 255
+        img_right = np.ones((h, w, 3), dtype=np.uint8) * 255        
         random.seed(0)
         draw_left = ImageDraw.Draw(img_left)
         for idx, (box, txt) in enumerate(zip(boxes, txts)):
@@ -104,8 +107,11 @@ class OCRResult(BaseCVResult):
                     box[:2, 1] = np.mean(box[:, 1])
                     box[2:, 1] = np.mean(box[:, 1]) + min(20, height)
                 draw_left.polygon(box, fill=color)
+                # img_right_text = draw_box_txt_fine(
+                #     (w, h), box, txt, SIMFANG_FONT_FILE_PATH
+                # )
                 img_right_text = draw_box_txt_fine(
-                    (w, h), box, txt, SIMFANG_FONT_FILE_PATH
+                    (w, h), box, txt, KOREAN_FONT_PATH
                 )
                 pts = np.array(box, np.int32).reshape((-1, 1, 2))
                 cv2.polylines(img_right_text, [pts], True, color, 1)

@@ -53,6 +53,7 @@ class OCRPipeline(BasePipeline):
         """
         super().__init__(device=device, pp_option=pp_option, use_hpip=use_hpip)
 
+        self.config = config
         self.use_doc_preprocessor = config.get("use_doc_preprocessor", True)
         if self.use_doc_preprocessor:
             doc_preprocessor_config = config.get("SubPipelines", {}).get(
@@ -116,6 +117,7 @@ class OCRPipeline(BasePipeline):
 
         self.batch_sampler = ImageBatchSampler(batch_size=1)
         self.img_reader = ReadImage(format="BGR")
+
 
     def rotate_image(
         self, image_array_list: List[np.ndarray], rotate_angle_list: List[int]

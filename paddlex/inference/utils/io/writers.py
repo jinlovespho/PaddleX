@@ -100,6 +100,7 @@ class ImageWriter(_BaseWriter):
 
     def write(self, out_path, obj):
         """write"""
+        # breakpoint()
         return self._backend.write_obj(str(out_path), obj)
 
     def _init_backend(self, bk_type, bk_args):
@@ -330,7 +331,7 @@ class PILImageWriterBackend(_ImageWriterBackend):
 
     def _write_obj(self, out_path, obj):
         """write image object by PIL"""
-        if isinstance(obj, Image.Image):
+        if isinstance(obj, Image.Image):    # t
             img = obj
         elif isinstance(obj, np.ndarray):
             img = Image.fromarray(obj)
