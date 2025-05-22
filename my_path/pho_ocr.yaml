@@ -24,6 +24,10 @@ SubPipelines:
 SubModules:
   TextDetection:
     module_name: text_detection
+    # PP-OCRv4_server_det
+    # PP-OCRv4_mobile_det
+    # PP-OCRv3_mobile_rec
+    # PP-OCRv5_server_det
     model_name: PP-OCRv4_server_det
     model_dir: null
     limit_side_len: 960
@@ -38,7 +42,14 @@ SubModules:
     batch_size: 6    
   TextRecognition:
     module_name: text_recognition
-    model_name: PP-OCRv4_server_rec_doc
-    model_dir: null
+    # PP-OCRv4_server_rec_doc
+    # PP-OCRv4_mobile_rec
+    # PP-OCRv4_server_rec
+    # en_PP-OCRv4_mobile_rec
+    # korean_PP-OCRv3_mobile_rec
+    model_name: korean_PP-OCRv3_mobile_rec
+    # model_dir: output/pho_rec/train_gpu2_ep8_bs256_lr1e-3/best_accuracy/inference
+    # model_dir: output/pho_rec/train_gpu0_ep8_bs256_lr1e-4/best_accuracy/inference
+    model_dir: output/pho_rec/train_gpu1_ep8_bs256_lr1e-5/best_accuracy/inference
     batch_size: 6
     score_thresh: 0.0

@@ -3,7 +3,7 @@ Global:
   mode: check_dataset # check_dataset/train/evaluate/predict
   module: text_det
   dataset_dir: "/paddle/dataset/paddlex/ocr_det/ocr_det_dataset_examples"
-  device: gpu:0,1,2,3
+  device: gpu:1
   output: "output"
 
 CheckDataset:
@@ -16,7 +16,7 @@ CheckDataset:
     val_percent: null
 
 Train:
-  epochs_iters: 100
+  epochs_iters: 3
   batch_size: 8
   learning_rate: 0.001
   pretrain_weight_path: https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv4_mobile_det_pretrained.pdparams
