@@ -147,6 +147,8 @@ def evaluate(gt_boxes, gt_texts, pred_boxes, pred_texts, iou_thresh=0.5):
 # --- MAIN PIPELINE ---
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--test_imgs_path', type=str, help='path to testing images')
+parser.add_argument('--test_anns_path', type=str, help='path to testing annotations')
 parser.add_argument('--save_root_path', type=str)
 parser.add_argument('--gpu', type=str)
 args = parser.parse_args()
@@ -158,8 +160,8 @@ font = ImageFont.truetype(font_path, size=15)
 
 
 # load test data
-test_imgs_path = f'/media/dataset1/jinlovespho/ocr_plantynet/data/filtered_train_test/test_images'
-test_anns_path = f'/media/dataset1/jinlovespho/ocr_plantynet/data/filtered_train_test/test_anns'
+test_imgs_path = args.test_imgs_path
+test_anns_path = args.test_anns_path
 
 test_imgs = sorted(os.listdir(test_imgs_path))
 test_anns = sorted(os.listdir(test_anns_path))
@@ -168,7 +170,6 @@ test_imgs = test_imgs[:30]
 test_anns = test_anns[:30]
 
 assert len(test_imgs) == len(test_anns), 'check number of test imgs and anns'
-
 num_test_imgs = len(test_imgs)
 
 
