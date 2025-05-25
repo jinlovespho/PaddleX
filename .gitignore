@@ -184,3 +184,5 @@ output/
 pho_vis1/
 pho_vis2/
 pho_vis3/
+pho_train_result/
+pho_test_result/

@@ -9,6 +9,7 @@ from konlpy.tag import Okt, Mecab
 import nltk 
 from nltk.tokenize import word_tokenize, sent_tokenize
 from pykospacing import Spacing
+import argparse
 
 # nltk.download('punkt')
 # nltk.download('punkt_tab')
@@ -145,34 +146,71 @@ def evaluate(gt_boxes, gt_texts, pred_boxes, pred_texts, iou_thresh=0.5):
 
 # --- MAIN PIPELINE ---
 
-pipeline = create_pipeline(pipeline="./my_path/pho_ocr.yaml", device='gpu:3')
-det_model_name = pipeline.config['SubModules']['TextDetection']['model_name']
-rec_model_name = pipeline.config['SubModules']['TextRecognition']['model_name']
+parser = argparse.ArgumentParser()
+parser.add_argument('--save_root_path', type=str)
+parser.add_argument('--gpu', type=str)
+args = parser.parse_args()
 
+
+# set korean font
 font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
 font = ImageFont.truetype(font_path, size=15)
 
-root_path = '/media/dataset1/jinlovespho/ocr_plantynet/data/filtered'
-imgs_path = f'{root_path}/images'
-anns_path = f'{root_path}/anns'
 
-imgs = sorted(os.listdir(imgs_path))[:50]
-anns = sorted(os.listdir(anns_path))[:50]
+# load test data
+test_imgs_path = f'/media/dataset1/jinlovespho/ocr_plantynet/data/filtered_train_test/test_images'
+test_anns_path = f'/media/dataset1/jinlovespho/ocr_plantynet/data/filtered_train_test/test_anns'
 
-SAVE_ROOT_PATH = './pho_vis3/train_gpu1_ep8_bs256_lr1e-5'
+test_imgs = sorted(os.listdir(test_imgs_path))
+test_anns = sorted(os.listdir(test_anns_path))
+
+test_imgs = test_imgs[:30]
+test_anns = test_anns[:30]
+
+assert len(test_imgs) == len(test_anns), 'check number of test imgs and anns'
+
+num_test_imgs = len(test_imgs)
+
+
+# load paddle
+pipeline = create_pipeline(pipeline="./my_path/pho_ocr.yaml", device=f'gpu:{args.gpu}')
+
+det_model_name = pipeline.config['SubModules']['TextDetection']['model_name']
+det_model_dir = pipeline.config['SubModules']['TextDetection']['model_dir']
+if det_model_dir is not None:
+    det_model_id = det_model_dir.split('/')[-3]
+else:
+    print(f'using original detector:{det_model_name} weight')
+    det_model_id = det_model_name
+
+rec_model_name = pipeline.config['SubModules']['TextRecognition']['model_name']
+rec_model_dir = pipeline.config['SubModules']['TextRecognition']['model_dir']
+if rec_model_dir is not None:
+    rec_model_id = rec_model_dir.split('/')[-3]
+else:
+    print(f'using original recognizer: {rec_model_name} weight')
+    rec_model_id = rec_model_name
+
+print(f'Detector: {det_model_id}')
+print(f'Recognizer: {rec_model_id}')
+
+
+# set save path
+SAVE_ROOT_PATH = f'{args.save_root_path}/{det_model_id}_{rec_model_id}'
 save_gt_path = f'{SAVE_ROOT_PATH}/gt'
-save_paddle_img_path = f'{SAVE_ROOT_PATH}/DET_{det_model_name}_REC_{rec_model_name}/pred_imgs'
-save_paddle_ann_path = f'{SAVE_ROOT_PATH}/DET_{det_model_name}_REC_{rec_model_name}/pred_anns'
+save_paddle_img_path = f'{SAVE_ROOT_PATH}/pred_imgs'
+save_paddle_ann_path = f'{SAVE_ROOT_PATH}/pred_anns'
 
 os.makedirs(save_gt_path, exist_ok=True)
 os.makedirs(save_paddle_img_path, exist_ok=True)
 os.makedirs(save_paddle_ann_path, exist_ok=True)
 
+
 all_tp, all_fp, all_fn, all_correct = 0, 0, 0, 0
 
-for img, ann in zip(imgs, anns):
-    img_path = os.path.join(imgs_path, img)
-    ann_path = os.path.join(anns_path, ann)
+for img, ann in zip(test_imgs, test_anns):
+    img_path = os.path.join(test_imgs_path, img)
+    ann_path = os.path.join(test_anns_path, ann)
     img_id = os.path.splitext(img)[0]
 
     gt_texts, gt_boxes = [], []
@@ -314,7 +352,7 @@ for img, ann in zip(imgs, anns):
                 best_iou = iou_val
                 best_j = j
 
-        if best_iou >= 0.5:
+        if best_iou >= 0.1:
             matched_gt.add(best_j)
             if p_text.strip() == gt_texts[best_j].strip():
                 color = 'green'  # TP + correct recognition
@@ -344,7 +382,7 @@ for img, ann in zip(imgs, anns):
     
     
     # --- Detailed Logging ---
-    log_path = f"{SAVE_ROOT_PATH}/DET_{det_model_name}_REC_{rec_model_name}/logs"
+    log_path = f"{SAVE_ROOT_PATH}/pred_logs"
     os.makedirs(log_path, exist_ok=True)
     with open(f"{log_path}/log_{img_id}.txt", "w", encoding="utf-8") as log_file:
         log_file.write(f"=== Detailed Recognition Results for {img_id} ===\n\n")
@@ -368,10 +406,6 @@ for img, ann in zip(imgs, anns):
           f"RecAcc: {result['Recognition Accuracy']:.3f}")
     print(f"→ Detailed log saved to {log_path}/log_{img_id}.txt")
 
-    # print(f"[{img_id}] Precision: {result['Detection Precision']:.3f}, "
-    #       f"Recall: {result['Detection Recall']:.3f}, "
-    #       f"RecAcc: {result['Recognition Accuracy']:.3f}")
-
 # --- Final Summary ---
 precision = all_tp / (all_tp + all_fp + 1e-6)
 recall = all_tp / (all_tp + all_fn + 1e-6)
@@ -385,3 +419,21 @@ print(f"Total Correct Text Matches: {all_correct}")
 print(f"Detection Precision: {precision:.3f}")
 print(f"Detection Recall: {recall:.3f}")
 print(f"Recognition Accuracy: {rec_acc:.3f}")
+
+
+# --- Save Overall Summary ---
+summary_path = f"{SAVE_ROOT_PATH}"
+os.makedirs(summary_path, exist_ok=True)
+summary_file = os.path.join(summary_path, f"pred_summary_for_{num_test_imgs}.txt")
+
+with open(summary_file, "w", encoding="utf-8") as f:
+    f.write("=== Overall Evaluation ===\n")
+    f.write(f"Total True Positives: {all_tp}\n")
+    f.write(f"Total False Positives: {all_fp}\n")
+    f.write(f"Total False Negatives: {all_fn}\n")
+    f.write(f"Total Correct Text Matches: {all_correct}\n")
+    f.write(f"Detection Precision: {precision:.3f}\n")
+    f.write(f"Detection Recall: {recall:.3f}\n")
+    f.write(f"Recognition Accuracy: {rec_acc:.3f}\n")
+
+print(f"→ Overall summary saved to {summary_file}")
