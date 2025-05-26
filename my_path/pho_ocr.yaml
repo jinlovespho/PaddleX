@@ -25,11 +25,11 @@ SubModules:
   TextDetection:
     module_name: text_detection
 
-    model_name: PP-OCRv4_mobile_det
+    # model_name: PP-OCRv4_mobile_det
     # model_name: PP-OCRv4_server_det
-    # model_name: PP-OCRv5_mobile_det
+    model_name: PP-OCRv5_mobile_det
     # model_name: PP-OCRv5_server_det
-
+    # model_dir: pho_train_result/pho_det/train_gpu4567_ep100_bs16_lr1e-3/best_accuracy/inference
     model_dir: 
     limit_side_len: 960
     limit_type: max
@@ -50,7 +50,6 @@ SubModules:
     # model_name: PP-OCRv5_mobile_rec
     # model_name: PP-OCRv5_server_rec
 
-    # model_dir: 
     # model_dir: output/pho_rec/train_gpu2_ep8_bs256_lr1e-3/best_accuracy/inference
     # model_dir: output/pho_rec/train_gpu0_ep8_bs256_lr1e-4/best_accuracy/inference
     # model_dir: output/pho_rec/train_gpu1_ep8_bs256_lr1e-5/best_accuracy/inference
@@ -59,7 +58,9 @@ SubModules:
     # model_dir: output/pho_rec/train_gpu0_ep1_bs256_lr1e-6/best_accuracy/inference
     # model_dir: output/pho_rec/train_gpu1_ep1_bs256_lr1e-5/best_accuracy/inference
     # model_dir: output/pho_rec/train_gpu2_ep1_bs256_lr1e-4/best_accuracy/inference
-    model_dir: output/pho_rec/train_gpu3_ep1_bs256_lr1e-3/best_accuracy/inference
-    # model_dir:
+    # model_dir: output/pho_rec/train_gpu3_ep1_bs256_lr1e-3/best_accuracy/inference
+    # model_dir: pho_train_result/pho_rec/train_gpu0123_ep30_bs256_lr1e-3/iter_epoch_30/inference
+    # model_dir: pho_train_result/pho_rec/train_gpu0123_ep30_bs256_lr1e-3/best_accuracy/inference
+    model_dir:
     batch_size: 6
     score_thresh: 0.0

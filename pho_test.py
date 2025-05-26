@@ -166,8 +166,8 @@ test_anns_path = args.test_anns_path
 test_imgs = sorted(os.listdir(test_imgs_path))
 test_anns = sorted(os.listdir(test_anns_path))
 
-test_imgs = test_imgs[:30]
-test_anns = test_anns[:30]
+test_imgs = test_imgs
+test_anns = test_anns
 
 assert len(test_imgs) == len(test_anns), 'check number of test imgs and anns'
 num_test_imgs = len(test_imgs)
@@ -411,6 +411,7 @@ for img, ann in zip(test_imgs, test_anns):
 precision = all_tp / (all_tp + all_fp + 1e-6)
 recall = all_tp / (all_tp + all_fn + 1e-6)
 rec_acc = all_correct / (all_tp + 1e-6)
+f1_det = 2 * precision * recall / (precision + recall + 1e-6)
 
 print("\n=== Overall Evaluation ===")
 print(f"Total True Positives: {all_tp}")
@@ -419,6 +420,7 @@ print(f"Total False Negatives: {all_fn}")
 print(f"Total Correct Text Matches: {all_correct}")
 print(f"Detection Precision: {precision:.3f}")
 print(f"Detection Recall: {recall:.3f}")
+print(f'Detection F1-score: {f1_det:.3f}')
 print(f"Recognition Accuracy: {rec_acc:.3f}")
 
 
@@ -435,6 +437,7 @@ with open(summary_file, "w", encoding="utf-8") as f:
     f.write(f"Total Correct Text Matches: {all_correct}\n")
     f.write(f"Detection Precision: {precision:.3f}\n")
     f.write(f"Detection Recall: {recall:.3f}\n")
+    f.write(f"Detection F1-score: {f1_det:.3f}\n")
     f.write(f"Recognition Accuracy: {rec_acc:.3f}\n")
 
 print(f"→ Overall summary saved to {summary_file}")
